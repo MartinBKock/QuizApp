@@ -24,7 +24,7 @@ struct SelectView: View {
                     VStack {
                         HStack {
                             Text("Category:")
-                                .dynamicTypeSize(.large)
+                                .dynamicTypeSize(.xxLarge)
                                 .foregroundColor(Color.white)
                             
                             if stateController.categories.isEmpty {
@@ -37,7 +37,7 @@ struct SelectView: View {
                                 }
                                 .tint(.white)
                                 .pickerStyle(.menu)
-                                .dynamicTypeSize(.large)
+                                .dynamicTypeSize(.xxLarge)
                                 .onChange(of: selectedCategory) { _ in
                                     stateController.fetchAllQuestionsOfCategory(from: URL(string: stateController.createUrlForAllQuestionsInCategory(category: selectedCategory))!)
                                     stateController.fetchNumberOfQuestionsForSingleDif(from: URL(string: stateController.createUrlForAllQuestionsInCategory(category: selectedCategory))!, dif: selectedDif)
@@ -59,7 +59,7 @@ struct SelectView: View {
                     VStack {
                         HStack {
                             Text("Difficulty: ")
-                                .dynamicTypeSize(.large)
+                                .dynamicTypeSize(.xxLarge)
                                 .foregroundColor(Color.white)
                             
                             Picker("Select a Difficulty", selection: $selectedDif) {
@@ -68,7 +68,7 @@ struct SelectView: View {
                                 }
                             }
                             .tint(.white)
-                            .dynamicTypeSize(.large)
+                            .dynamicTypeSize(.xxLarge)
                             .onChange(of: selectedDif) { _ in
                                 stateController.fetchNumberOfQuestionsForSingleDif(from: URL(string: stateController.createUrlForAllQuestionsInCategory(category: selectedCategory))!, dif: selectedDif)
                                 update()

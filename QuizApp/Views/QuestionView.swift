@@ -71,6 +71,7 @@ struct QuestionView: View {
                                     .frame(width: 300, height: 50)
                                     .onTapGesture {
                                         stateController.fetchQuestions(from: url)
+                                        showBool = false
                                     }
                             } 
                         } else {

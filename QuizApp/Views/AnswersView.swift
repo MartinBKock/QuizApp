@@ -31,11 +31,15 @@ struct AnswersView: View {
     
     private func answerBox(answer: String) -> some View {
         return ZStack {
+           
             Rectangle()
                 .foregroundColor(Color.white)
                 .cornerRadius(8)
                 .shadow(radius: 3)
                 .onTapGesture {
+                    if !showBool {
+                        hasBeenTapped = false
+                    }
                     if !hasBeenTapped { 
                         hasBeenTapped = true
                         if stateController.checkAnswer(answer, question) {
