@@ -15,7 +15,9 @@ struct QuestionView: View {
     @State private var showBool = false
     @State private var isCorrect = false
     @Binding var path: [TriviaQuestion]
-    @Binding var score: Int
+   // @Binding var score: Int
+    @AppStorage("score") var score = 0
+    @Binding var resume: Bool
     
     var url: URL
     var question: TriviaQuestion
@@ -71,6 +73,7 @@ struct QuestionView: View {
                                     .frame(width: 300, height: 50)
                                     .onTapGesture {
                                         stateController.fetchQuestions(from: url)
+                                        stateController.write(stateController.questions, filename: "Questions")
                                         showBool = false
                                     }
                             } 
@@ -82,8 +85,11 @@ struct QuestionView: View {
                                     if stateController.questions.count == 1 {
                                         showAlert = true
                                     } else {
+                                 
                                         stateController.nextQuestion()
+                                        stateController.write(stateController.questions, filename: "Questions")
                                         path.append(stateController.currentQuestion!)
+                                        stateController.write(path, filename: "NavigationPath")
                                     }
                                     
                                 }
@@ -98,8 +104,13 @@ struct QuestionView: View {
                             title: Text("Quiz Finished"),
                             message: Text("Congratulations! You have finished the quiz with a score of \(score)."),
                             dismissButton: .default(Text("OK")) {
+                                stateController.questions.removeAll()
+                                stateController.oldQuestions.removeAll()
+                                stateController.write(stateController.questions, filename: "Questions")
                                 stateController.fetchQuestions(from: url)
                                 path.removeAll()
+                                stateController.write(path, filename: "NavigationPath")
+                                resume.toggle()
                                 score = 0
                                 
                             }
@@ -137,7 +148,7 @@ struct QuestionView: View {
 struct QuestionView_Previews: PreviewProvider {
     static var previews: some View {
         QuestionView(
-            path: .constant([TriviaQuestion(category: "", type: "", difficulty: "", question: "", correctAnswer: "", incorrectAnswers: ["", ""])]), score: .constant(0), url: URL(string: "https://www.google.com")!,
+            path: .constant([TriviaQuestion(category: "", type: "", difficulty: "", question: "", correctAnswer: "", incorrectAnswers: ["", ""])]),  resume: .constant(false), url: URL(string: "https://www.google.com")!,
             question: TriviaQuestion(
                 category: "History".toBase64(),
                 type: "multiple".toBase64(),

@@ -9,11 +9,13 @@ import SwiftUI
 
 class StateController: ObservableObject {
     @Published var questions = [TriviaQuestion]()
+    @Published var oldQuestions = [TriviaQuestion]()
     @Published var categories = [Category]()
     @Published var currentQuestion: TriviaQuestion?
     @Published var path = [TriviaQuestion]()
     @Published var numberOfQuestionsOfCat: Int = 0
     @Published var numberOfQuestionsInDif: Int = 0
+    
     
     
     init() {
@@ -22,6 +24,18 @@ class StateController: ObservableObject {
         
         fetchQuestions(from: URL(string: "https://opentdb.com/api.php?amount=10&category=9&difficulty=easy&encode=base64")!)
         fetchNumberOfQuestionsForSingleDif(from: URL(string: createUrlForAllQuestionsInCategory(category: Category(id: 9, name: "General Knowledge")))!, dif: "easy")
+        
+        if read(filename: "NavigationPath").count > 0 {
+            path = read(filename: "NavigationPath")
+            print("path: \(path.count)")
+        }
+        
+        if read(filename: "Questions").count > 0 {
+            oldQuestions = read(filename: "Questions")
+            print("Questions: \(oldQuestions.count)")
+        }
+    
+        
         
     }
     
@@ -133,6 +147,31 @@ class StateController: ObservableObject {
             currentQuestion = nextQuestion
         }
     }
+    
+    func write<T: Encodable>(_ object: T, filename: String) {
+        let homeFolder = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+        let path = homeFolder?.appendingPathComponent("\(filename).json")
+        do {
+            let data = try JSONEncoder().encode(object)
+            try data.write(to: path!)
+        } catch {
+            print("Could not write file \(path!): \(error)")
+        }
+    }
+    
+    func read(filename: String) -> [TriviaQuestion] {
+        let homeFolder = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+        let path = homeFolder?.appendingPathComponent("\(filename).json")
+        guard let data = try? Data(contentsOf: path!), !data.isEmpty else {
+            return []
+        }
+        let decoder = JSONDecoder()
+        return try! decoder.decode([TriviaQuestion].self, from: data)
+    }
+
+
+
+  
     
 }
 

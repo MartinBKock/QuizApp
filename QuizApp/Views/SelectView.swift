@@ -13,14 +13,34 @@ struct SelectView: View {
     @State private var selectedCategory: Category = StateController().categories.first ?? Category(id: 9, name: "General knowledge")
     @State private var selectedDif = "easy"
     @State var path = [TriviaQuestion]()
-    @State var score = 0;
+    
+    @AppStorage("score") var score = 0
+    //@State var score = 0;
     @State var urlTry = "";
+    @State var resumeShow = false
+    @State var resume = false
     
     var body: some View {
+     
+        
+        
         NavigationStack(path: $path) {
             ZStack {
                 BackgroundView()
                 VStack(alignment: .leading, spacing: 40) {
+                    
+                    if (stateController.path.count > 0 && stateController.oldQuestions.count > 0 && resume == false){
+                        VStack {
+                            Button {
+                                resume.toggle()
+                                resumeShow.toggle()
+                            } label: {
+                                Text("Resume?")
+                                    .foregroundColor(.white)
+                            }
+
+                        }
+                    }
                     VStack {
                         HStack {
                             Text("Category:")
@@ -86,7 +106,9 @@ struct SelectView: View {
                     }
                     
                     VStack {
-                        if stateController.questions.count > 0 {
+                        
+                        
+                        if stateController.questions.count > 0 && stateController.numberOfQuestionsOfCat > 0 && urlTry != ""{
                             ZStack {
                                 Rectangle()
                                     .foregroundColor(Color.clear)
@@ -100,6 +122,7 @@ struct SelectView: View {
                                     NavigationLink("Generate Quiz", value: stateController.questions[0])
                                         .tint(.white)
                                         .dynamicTypeSize(.accessibility1)
+                                    
                                 }
                             }.frame(width: 250, height: 50)
                             
@@ -109,7 +132,8 @@ struct SelectView: View {
                                 .foregroundColor(Color.white)
                         }
                     }.navigationDestination(for: TriviaQuestion.self) { _ in
-                        QuestionView(path: $path, score: $score, url: URL(string: urlTry)!, question: stateController.questions[0])
+                        QuestionView(path: $path, resume: $resume, url: URL(string: urlTry)!, question: stateController.questions[0])
+                        
                             .navigationBarBackButtonHidden(true)
                             .toolbar {
                                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -119,6 +143,7 @@ struct SelectView: View {
                                     Image(systemName: "house")
                                         .onTapGesture {
                                             path.removeAll()
+                                            
                                             score = 0
                                             let url = stateController.createURLString(category: selectedCategory, difficulty: selectedDif, numQuestions: 10)
                                             
@@ -144,6 +169,16 @@ struct SelectView: View {
                     }
                 }
                 .ignoresSafeArea()
+                .alert(isPresented: $resumeShow) {
+                    Alert(
+                        title: Text("Resume"),
+                        message: Text("You are now resuming."),
+                        dismissButton: .default(Text("OK")) {
+                            path = stateController.path
+                            stateController.questions = stateController.oldQuestions
+                        }
+                    )
+                }
             }
             
             
@@ -153,17 +188,18 @@ struct SelectView: View {
     private func update() {
         
         stateController.fetchAllQuestionsOfCategory(from: URL(string: stateController.createUrlForAllQuestionsInCategory(category: selectedCategory))!)
+     
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
             var numQuestions: Int
             if stateController.numberOfQuestionsInDif >= 10 {
                 numQuestions = 10
             } else {
                 numQuestions = stateController.numberOfQuestionsInDif
             }
-            
             let url = stateController.createURLString(category: selectedCategory, difficulty: selectedDif, numQuestions: numQuestions)
             urlTry = url
+          
             stateController.fetchQuestions(from: URL(string: url)!)
         }
     }
